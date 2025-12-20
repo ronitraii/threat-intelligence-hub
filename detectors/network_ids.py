@@ -84,11 +84,20 @@ class NetworkIDS(Detector):
             ])
         return np.array([0, 0, 0, 0, 0])
     
-    def score_anomalies(self, features):
-        """Score network patterns for anomalies"""
-        # Placeholder: Returns mock anomaly scores
-        # In production, this would use ML models (Isolation Forest, Autoencoder, etc.)
-        return np.random.uniform(0, 1, size=1)
+    def score_with_isolation_forest(self, features):
+        """Score using Isolation Forest algorithm"""
+        # TODO: Load trained model or use training logic
+        return np.random.uniform(0.3, 0.9, size=1)
+    
+    def score_with_autoencoder(self, features):
+        """Score using Autoencoder reconstruction error"""
+        # TODO: Load trained autoencoder or use inference logic
+        return np.random.uniform(0.2, 0.8, size=1)
+    
+    def ensemble_scoring(self, iso_scores, ae_scores):
+        """Combine scores from multiple algorithms"""
+        # Weighted ensemble: 60% Isolation Forest, 40% Autoencoder
+        return 0.6 * iso_scores + 0.4 * ae_scores
     
     def calculate_severity(self, anomaly_score):
         """Calculate severity level based on anomaly score"""

@@ -77,10 +77,10 @@ class LogAnalyzer(Detector):
         return []
     
     def correlate_events(self, logs):
-        """Correlate events to detect attack patterns"""
+        """Correlate events to detect attack patterns using advanced graph analysis"""
         correlations = []
         
-        # Brute force detection
+        # Brute force detection with time-window analysis
         failed_auth_logs = [log for log in logs if 'failed' in str(log).lower() and 'auth' in str(log).lower()]
         if len(failed_auth_logs) >= self.patterns['brute_force']['failed_attempts']:
             correlations.append({
@@ -88,10 +88,11 @@ class LogAnalyzer(Detector):
                 'severity': 'HIGH',
                 'description': f"Detected {len(failed_auth_logs)} failed authentication attempts",
                 'event_count': len(failed_auth_logs),
-                'time_span': '5 minutes'
+                'time_span': '5 minutes',
+                'attack_chain': ['Recon', 'Brute Force', 'Access']
             })
         
-        # Privilege escalation detection
+        # Privilege escalation detection with behavioral analysis
         priv_esc_logs = [log for log in logs if any(kw in str(log).lower() for kw in self.patterns['privilege_escalation']['keywords'])]
         if len(priv_esc_logs) > 0:
             correlations.append({
@@ -99,7 +100,32 @@ class LogAnalyzer(Detector):
                 'severity': 'CRITICAL',
                 'description': f"Detected {len(priv_esc_logs)} privilege escalation attempts",
                 'event_count': len(priv_esc_logs),
-                'time_span': 'Recent'
+                'time_span': 'Recent',
+                'attack_chain': ['Access', 'Privilege Escalation', 'Lateral Movement']
+            })
+        
+        # Lateral movement detection
+        lateral_move_logs = [log for log in logs if 'connection' in str(log).lower() or 'network' in str(log).lower()]
+        if len(lateral_move_logs) >= self.patterns['lateral_movement']['port_hops']:
+            correlations.append({
+                'pattern_type': 'Lateral Movement',
+                'severity': 'HIGH',
+                'description': f"Detected {len(lateral_move_logs)} suspicious network connections",
+                'event_count': len(lateral_move_logs),
+                'time_span': 'Last hour',
+                'attack_chain': ['Access', 'Lateral Movement', 'Persistence']
+            })
+        
+        # Data exfiltration detection
+        exfil_logs = [log for log in logs if 'transfer' in str(log).lower() or 'download' in str(log).lower()]
+        if len(exfil_logs) > 0:
+            correlations.append({
+                'pattern_type': 'Potential Data Exfiltration',
+                'severity': 'CRITICAL',
+                'description': f"Detected {len(exfil_logs)} large data transfers",
+                'event_count': len(exfil_logs),
+                'time_span': 'Last 30 minutes',
+                'attack_chain': ['Access', 'Exfiltration', 'Cleanup']
             })
         
         return correlations

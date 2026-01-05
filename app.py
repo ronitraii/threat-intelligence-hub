@@ -5,6 +5,7 @@ Integrated threat detection platform
 
 from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS
+from web_ui.api import api
 import logging
 from datetime import datetime
 
@@ -17,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 CORS(app)
+app.register_blueprint(api)
 
 # Global state for threat data
 threat_data = {
